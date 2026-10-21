@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: revision-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/revision_service
+    username: ${REVISION_DB_USER:revision_service}
+    password: ${REVISION_DB_PASSWORD:revision_service}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
