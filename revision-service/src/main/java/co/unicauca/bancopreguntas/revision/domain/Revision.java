@@ -20,6 +20,8 @@ import java.time.Instant;
 @Table(name = "revisiones")
 public class Revision {
 
+    public static final int MAX_OBSERVACIONES = 1000;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,6 +39,12 @@ public class Revision {
     @Column(name = "fecha_asignacion", nullable = false)
     private Instant fechaAsignacion;
 
+    @Column(name = "observaciones", length = MAX_OBSERVACIONES)
+    private String observaciones;
+
+    @Column(name = "fecha_evaluacion")
+    private Instant fechaEvaluacion;
+
     protected Revision() {
         // requerido por JPA
     }
@@ -46,6 +54,43 @@ public class Revision {
         this.revisorId = revisorId;
         this.estado = EstadoRevision.ASIGNADA;
         this.fechaAsignacion = Instant.now();
+    }
+
+    /**
+     * Registra el dictamen del revisor.
+     * <ul>
+     *     <li>Solo el revisor asignado puede evaluar.</li>
+     *     <li>El resultado debe ser APROBADA o RECHAZADA y la transicion debe ser valida
+     *     (una revision ya evaluada no se puede volver a evaluar).</li>
+     *     <li>Un rechazo exige observaciones para que el autor sepa que corregir.</li>
+     * </ul>
+     *
+     * @param revisorEvaluador revisor que emite el dictamen
+     * @param resultado        APROBADA o RECHAZADA
+     * @param observaciones    comentarios para el autor (obligatorios al rechazar)
+     */
+    public void evaluar(Long revisorEvaluador, EstadoRevision resultado, String observaciones) {
+        if (revisorEvaluador == null || !revisorEvaluador.equals(revisorId)) {
+            throw new ReglaRevisionException("Solo el revisor asignado puede evaluar esta revision.");
+        }
+        if (resultado != EstadoRevision.APROBADA && resultado != EstadoRevision.RECHAZADA) {
+            throw new ReglaRevisionException("El resultado de la evaluacion debe ser APROBADA o RECHAZADA.");
+        }
+        if (!estado.puedeTransicionarA(resultado)) {
+            throw new ReglaRevisionException(
+                    "La revision esta en estado " + estado + " y no puede pasar a " + resultado + ".");
+        }
+        String texto = observaciones == null ? null : observaciones.strip();
+        if (resultado == EstadoRevision.RECHAZADA && (texto == null || texto.isEmpty())) {
+            throw new ReglaRevisionException("Un rechazo debe incluir observaciones para el autor.");
+        }
+        if (texto != null && texto.length() > MAX_OBSERVACIONES) {
+            throw new ReglaRevisionException(
+                    "Las observaciones no pueden superar " + MAX_OBSERVACIONES + " caracteres.");
+        }
+        this.estado = resultado;
+        this.observaciones = texto == null || texto.isEmpty() ? null : texto;
+        this.fechaEvaluacion = Instant.now();
     }
 
     public Long getId() {
@@ -66,5 +111,13 @@ public class Revision {
 
     public Instant getFechaAsignacion() {
         return fechaAsignacion;
+    }
+
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public Instant getFechaEvaluacion() {
+        return fechaEvaluacion;
     }
 }

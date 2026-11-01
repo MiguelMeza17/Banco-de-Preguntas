@@ -9,7 +9,9 @@ public record RevisionResponse(
         Long preguntaId,
         Long revisorId,
         String estado,
-        Instant fechaAsignacion
+        Instant fechaAsignacion,
+        String observaciones,
+        Instant fechaEvaluacion
 ) {
     public static RevisionResponse from(Revision revision) {
         return new RevisionResponse(
@@ -17,7 +19,9 @@ public record RevisionResponse(
                 revision.getPreguntaId(),
                 revision.getRevisorId(),
                 revision.getEstado().name(),
-                revision.getFechaAsignacion()
+                revision.getFechaAsignacion(),
+                revision.getObservaciones(),
+                revision.getFechaEvaluacion()
         );
     }
 }
