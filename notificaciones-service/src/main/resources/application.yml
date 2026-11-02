@@ -1,0 +1,29 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notificaciones-service
+  datasource:
+    url: jdbc:h2:file:./data/notificaciones-db;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  artemis:
+    mode: native
+    broker-url: tcp://localhost:61616
+  jms:
+    pub-sub-domain: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

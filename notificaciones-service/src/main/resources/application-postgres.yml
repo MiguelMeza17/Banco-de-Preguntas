@@ -1,0 +1,6 @@
+# Perfil para produccion: --spring.profiles.active=postgres
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notificaciones_service
+    username: ${NOTIFICACIONES_DB_USER:notificaciones_service}
+    password: ${NOTIFICACIONES_DB_PASSWORD:notificaciones_service}
