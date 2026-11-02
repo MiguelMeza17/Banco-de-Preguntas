@@ -1,0 +1,53 @@
+server:
+  port: 8080
+
+# Direcciones de los microservicios. Para escalar un servicio se cambia su URL por la de un
+# balanceador (o se usa lb://nombre con un registro de servicios) sin tocar el frontend.
+servicios:
+  usuarios: http://localhost:8081
+  preguntas: http://localhost:8082
+  revision: http://localhost:8083
+  notificaciones: http://localhost:8085
+
+frontend:
+  origen: http://localhost:3000
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: usuarios-service
+          uri: ${servicios.usuarios}
+          predicates:
+            - Path=/api/usuarios/**
+          filters:
+            - StripPrefix=1
+        - id: preguntas-service
+          uri: ${servicios.preguntas}
+          predicates:
+            - Path=/api/preguntas/**
+          filters:
+            - StripPrefix=1
+        - id: revision-service
+          uri: ${servicios.revision}
+          predicates:
+            - Path=/api/revisiones/**
+          filters:
+            - StripPrefix=1
+        - id: notificaciones-service
+          uri: ${servicios.notificaciones}
+          predicates:
+            - Path=/api/notificaciones/**
+          filters:
+            - StripPrefix=1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,gateway
+  endpoint:
+    gateway:
+      enabled: true
