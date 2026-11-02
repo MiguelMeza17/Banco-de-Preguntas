@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Banco de Preguntas Saber Pro</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<!-- ======================================================== Acceso -->
+<section id="vista-acceso" class="acceso">
+  <div class="tarjeta acceso-tarjeta">
+    <h1>Banco de Preguntas <span>Saber Pro</span></h1>
+    <p class="sutil">Universidad del Cauca · Ingeniería de Software II</p>
+
+    <form id="form-login" class="formulario">
+      <label>Usuario <input name="login" required autocomplete="username"></label>
+      <label>Contraseña <input name="password" type="password" required autocomplete="current-password"></label>
+      <button type="submit" class="primario">Ingresar</button>
+      <p class="sutil centro">¿No tiene cuenta? <a href="#" id="ir-registro">Regístrese</a></p>
+    </form>
+
+    <form id="form-registro" class="formulario oculto">
+      <label>Usuario <input name="login" required></label>
+      <label>Nombre completo <input name="nombreCompleto" required></label>
+      <label>Correo <input name="email" type="email"></label>
+      <label>Rol
+        <select name="rol" required>
+          <option value="AUTOR">Autor de preguntas</option>
+          <option value="REVISOR">Revisor</option>
+          <option value="DOCENTE">Docente</option>
+          <option value="ESTUDIANTE">Estudiante</option>
+          <option value="ADMINISTRADOR">Administrador</option>
+        </select>
+      </label>
+      <label>Contraseña <input name="password" type="password" required>
+        <small>Mínimo 6 caracteres, una mayúscula, un dígito y un carácter especial.</small>
+      </label>
+      <button type="submit" class="primario">Crear cuenta</button>
+      <p class="sutil centro"><a href="#" id="ir-login">Volver a ingresar</a></p>
+    </form>
+  </div>
+</section>
+
+<!-- ======================================================== Aplicacion -->
+<section id="vista-app" class="oculto">
+  <header class="barra">
+    <div class="marca">Banco de Preguntas <span>Saber Pro</span></div>
+    <nav id="menu"></nav>
+    <div class="usuario">
+      <button id="btn-notificaciones" class="campana" title="Notificaciones">🔔<span id="contador" class="oculto"></span></button>
+      <span id="nombre-usuario"></span>
+      <button id="btn-salir" class="enlace">Salir</button>
+    </div>
+  </header>
+  <main id="contenido"></main>
+</section>
+
+<dialog id="dialogo">
+  <div id="dialogo-contenido"></div>
+</dialog>
+
+<div id="avisos"></div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
