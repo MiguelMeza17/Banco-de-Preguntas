@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor Autor
+    actor Admin
+    actor Revisor
+    participant GW as api-gateway
+    participant P as preguntas-service
+    participant R as revision-service
+    participant B as event-bus
+    participant N as notificaciones-service
+    Autor->>GW: PATCH /api/preguntas/1/estado (PENDIENTE_REVISION)
+    GW->>P: PATCH /preguntas/1/estado
+    P-->>B: PreguntaEnviadaARevision
+    B-->>N: aviso al administrador
+    Admin->>GW: POST /api/fachada/preguntas/1/revisores
+    GW->>P: GET /preguntas/1 (verifica que este pendiente)
+    GW->>R: POST /revisiones/asignar
+    R-->>B: RevisoresAsignados
+    B-->>P: pregunta pasa a En revision
+    B-->>N: aviso a cada revisor
+    Revisor->>GW: POST /api/revisiones/7/evaluar
+    GW->>R: POST /revisiones/7/evaluar
+    R-->>B: PreguntaEvaluada (dictamen final)
+    B-->>P: pregunta pasa a Aprobada o Rechazada
+    B-->>N: aviso al autor y al administrador
