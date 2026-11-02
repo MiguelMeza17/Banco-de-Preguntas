@@ -4,6 +4,7 @@ import co.unicauca.bancopreguntas.revision.domain.EstadoRevision;
 import co.unicauca.bancopreguntas.revision.domain.ReglaRevisionException;
 import co.unicauca.bancopreguntas.revision.domain.Revision;
 import co.unicauca.bancopreguntas.revision.evento.PreguntaEvaluada;
+import co.unicauca.bancopreguntas.revision.evento.EventoIntegracion;
 import co.unicauca.bancopreguntas.revision.evento.PublicadorEventos;
 import co.unicauca.bancopreguntas.revision.repository.RevisionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +42,7 @@ class EvaluacionRevisionServiceTest {
     private PublicadorEventos publicadorEventos;
 
     @Captor
-    private ArgumentCaptor<Object> eventoCaptor;
+    private ArgumentCaptor<EventoIntegracion> eventoCaptor;
 
     private EvaluacionRevisionService service;
 
@@ -51,7 +53,64 @@ class EvaluacionRevisionServiceTest {
     }
 
     private void existeRevisionAsignada() {
-        when(revisionRepository.findById(REVISION)).thenReturn(Optional.of(new Revision(PREGUNTA, REVISOR)));
+        existenRevisiones(new Revision(PREGUNTA, REVISOR));
+    }
+
+    /** La primera es la que se evalua; las demas son de otros revisores de la misma pregunta. */
+    private void existenRevisiones(Revision... revisiones) {
+        when(revisionRepository.findById(REVISION)).thenReturn(Optional.of(revisiones[0]));
+        lenient().when(revisionRepository.findByPreguntaId(PREGUNTA)).thenReturn(List.of(revisiones));
+    }
+
+    private PreguntaEvaluada eventoPublicado() {
+        verify(publicadorEventos).publicar(eventoCaptor.capture());
+        return (PreguntaEvaluada) eventoCaptor.getValue();
+    }
+
+    @Test
+    void conUnSoloRevisorLaRevisionQuedaCompletaConSuDictamen() {
+        existeRevisionAsignada();
+
+        service.evaluar(REVISION, REVISOR, EstadoRevision.APROBADA, null);
+
+        PreguntaEvaluada evento = eventoPublicado();
+        assertThat(evento.revisionCompleta()).isTrue();
+        assertThat(evento.resultadoPregunta()).isEqualTo("APROBADA");
+    }
+
+    @Test
+    void siFaltanRevisoresNoHayDictamenFinal() {
+        existenRevisiones(new Revision(PREGUNTA, REVISOR), new Revision(PREGUNTA, 8L));
+
+        service.evaluar(REVISION, REVISOR, EstadoRevision.APROBADA, null);
+
+        PreguntaEvaluada evento = eventoPublicado();
+        assertThat(evento.revisionCompleta()).isFalse();
+        assertThat(evento.resultadoPregunta()).isNull();
+    }
+
+    @Test
+    void bastaUnRechazoParaQueLaPreguntaQuedeRechazada() {
+        Revision otra = new Revision(PREGUNTA, 8L);
+        otra.evaluar(8L, EstadoRevision.RECHAZADA, "La clave es ambigua");
+        existenRevisiones(new Revision(PREGUNTA, REVISOR), otra);
+
+        service.evaluar(REVISION, REVISOR, EstadoRevision.APROBADA, null);
+
+        PreguntaEvaluada evento = eventoPublicado();
+        assertThat(evento.revisionCompleta()).isTrue();
+        assertThat(evento.resultadoPregunta()).isEqualTo("RECHAZADA");
+    }
+
+    @Test
+    void todasAprobadasDanPreguntaAprobada() {
+        Revision otra = new Revision(PREGUNTA, 8L);
+        otra.evaluar(8L, EstadoRevision.APROBADA, null);
+        existenRevisiones(new Revision(PREGUNTA, REVISOR), otra);
+
+        service.evaluar(REVISION, REVISOR, EstadoRevision.APROBADA, "Bien");
+
+        assertThat(eventoPublicado().resultadoPregunta()).isEqualTo("APROBADA");
     }
 
     @Test
