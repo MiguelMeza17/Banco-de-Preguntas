@@ -21,9 +21,14 @@ public record RevisoresAsignados(
         List<Long> revisionIds,
         List<Long> revisorIds,
         Instant ocurridoEn
-) {
+) implements EventoIntegracion {
     public RevisoresAsignados {
         revisionIds = Collections.unmodifiableList(new ArrayList<>(revisionIds));
         revisorIds = Collections.unmodifiableList(new ArrayList<>(revisorIds));
+    }
+
+    @Override
+    public String topico() {
+        return Topicos.REVISORES_ASIGNADOS;
     }
 }

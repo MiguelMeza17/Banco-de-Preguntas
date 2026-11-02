@@ -1,14 +1,29 @@
 server:
-  port: 8081
+  port: 8083
 
 spring:
   application:
     name: revision-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/revision_service
-    username: ${REVISION_DB_USER:revision_service}
-    password: ${REVISION_DB_PASSWORD:revision_service}
+    url: jdbc:h2:file:./data/revision-db;AUTO_SERVER=TRUE
+    username: sa
+    password: ""
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
+  artemis:
+    mode: native
+    broker-url: tcp://localhost:61616
+  jms:
+    pub-sub-domain: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
