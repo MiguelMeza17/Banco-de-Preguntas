@@ -1,5 +1,6 @@
 package co.unicauca.bancopreguntas.revision.service;
 
+import co.unicauca.bancopreguntas.revision.domain.ReglaRevisionException;
 import co.unicauca.bancopreguntas.revision.domain.Revision;
 import co.unicauca.bancopreguntas.revision.evento.PublicadorEventos;
 import co.unicauca.bancopreguntas.revision.evento.RevisoresAsignados;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class AsignacionRevisionService {
@@ -29,7 +32,20 @@ public class AsignacionRevisionService {
      */
     @Transactional
     public List<Revision> asignarRevisores(Long preguntaId, List<Long> revisorIds) {
-        List<Revision> asignaciones = revisorIds.stream()
+        if (preguntaId == null) {
+            throw new ReglaRevisionException("Debe indicar la pregunta a revisar.");
+        }
+        if (revisorIds == null || revisorIds.isEmpty()) {
+            throw new ReglaRevisionException("Debe asignar al menos un revisor.");
+        }
+        Set<Long> unicos = new LinkedHashSet<>(revisorIds);
+        Set<Long> yaAsignados = new LinkedHashSet<>();
+        revisionRepository.findByPreguntaId(preguntaId).forEach(r -> yaAsignados.add(r.getRevisorId()));
+        unicos.stream().filter(yaAsignados::contains).findFirst().ifPresent(id -> {
+            throw new ReglaRevisionException("El revisor " + id + " ya esta asignado a esta pregunta.");
+        });
+
+        List<Revision> asignaciones = unicos.stream()
                 .map(revisorId -> new Revision(preguntaId, revisorId))
                 .toList();
         List<Revision> guardadas = revisionRepository.saveAll(asignaciones);

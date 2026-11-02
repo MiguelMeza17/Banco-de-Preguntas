@@ -1,7 +1,9 @@
 package co.unicauca.bancopreguntas.revision.service;
 
 import co.unicauca.bancopreguntas.revision.domain.EstadoRevision;
+import co.unicauca.bancopreguntas.revision.domain.ReglaRevisionException;
 import co.unicauca.bancopreguntas.revision.domain.Revision;
+import co.unicauca.bancopreguntas.revision.evento.EventoIntegracion;
 import co.unicauca.bancopreguntas.revision.evento.PublicadorEventos;
 import co.unicauca.bancopreguntas.revision.evento.RevisoresAsignados;
 import co.unicauca.bancopreguntas.revision.repository.RevisionRepository;
@@ -19,6 +21,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,14 +41,14 @@ class AsignacionRevisionServiceTest {
     private ArgumentCaptor<List<Revision>> revisionesCaptor;
 
     @Captor
-    private ArgumentCaptor<Object> eventoCaptor;
+    private ArgumentCaptor<EventoIntegracion> eventoCaptor;
 
     private AsignacionRevisionService service;
 
     @BeforeEach
     void setUp() {
         service = new AsignacionRevisionService(revisionRepository, publicadorEventos);
-        when(revisionRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
+        lenient().when(revisionRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
     }
 
     @Test
@@ -86,5 +92,26 @@ class AsignacionRevisionServiceTest {
         assertThat(evento.revisorIds()).containsExactly(1L, 2L);
         assertThat(evento.revisionIds()).hasSize(2);
         assertThat(evento.ocurridoEn()).isNotNull();
+    }
+
+    @Test
+    void exigeAlMenosUnRevisor() {
+        assertThatThrownBy(() -> service.asignarRevisores(10L, List.of()))
+                .isInstanceOf(ReglaRevisionException.class);
+        verify(publicadorEventos, never()).publicar(any());
+    }
+
+    @Test
+    void noAsignaDosVecesAlMismoRevisor() {
+        when(revisionRepository.findByPreguntaId(10L)).thenReturn(List.of(new Revision(10L, 1L)));
+
+        assertThatThrownBy(() -> service.asignarRevisores(10L, List.of(1L, 2L)))
+                .hasMessageContaining("ya esta asignado");
+        verify(revisionRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void losRevisoresRepetidosEnLaPeticionSeAsignanUnaVez() {
+        assertThat(service.asignarRevisores(10L, List.of(1L, 1L, 2L))).hasSize(2);
     }
 }
