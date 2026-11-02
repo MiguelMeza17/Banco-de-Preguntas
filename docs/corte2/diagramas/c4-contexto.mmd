@@ -1,0 +1,14 @@
+flowchart TB
+    autor["<b>Autor de preguntas</b><br/>[Persona]<br/>Crea y corrige preguntas"]
+    admin["<b>Administrador</b><br/>[Persona]<br/>Asigna revisores, publica y archiva"]
+    revisor["<b>Revisor</b><br/>[Persona]<br/>Evalua las preguntas asignadas"]
+    docente["<b>Docente / Estudiante</b><br/>[Persona]<br/>Consulta el banco publicado"]
+    sistema["<b>Sistema Banco de Preguntas Saber Pro</b><br/>[Sistema de software]<br/>Gestion, validacion estructural y revision por pares de preguntas"]
+    correo["<b>Servicio de correo</b><br/>[Sistema externo, simulado]<br/>Entrega los avisos"]
+    autor -- "Crea y envia a revision" --> sistema
+    admin -- "Asigna revisores, publica" --> sistema
+    revisor -- "Aprueba o rechaza" --> sistema
+    docente -- "Consulta" --> sistema
+    sistema -. "Envia avisos" .-> correo
+    style sistema fill:#0b3a75,color:#ffffff,stroke:#0b3a75
+    style correo fill:#eeeeee,stroke:#888888

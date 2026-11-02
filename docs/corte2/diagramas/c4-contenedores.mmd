@@ -1,0 +1,29 @@
+flowchart TB
+    nav["<b>Navegador web</b><br/>[Persona: autor, admin, revisor]"]
+    subgraph sistema["Sistema Banco de Preguntas Saber Pro"]
+        front["<b>frontend-web</b><br/>[HTML, CSS, JavaScript] :3000<br/>Interfaz por rol"]
+        gw["<b>api-gateway</b><br/>[Spring Cloud Gateway] :8080<br/>Enrutamiento, CORS y Fachada"]
+        us["<b>usuarios-service</b><br/>[Spring Boot] :8081<br/>Registro, login y roles"]
+        ps["<b>preguntas-service</b><br/>[Spring Boot] :8082<br/>Autoria, ciclo de vida, consulta"]
+        rs["<b>revision-service</b><br/>[Spring Boot] :8083<br/>Asignacion y evaluacion"]
+        ns["<b>notificaciones-service</b><br/>[Spring Boot] :8085<br/>Avisos por eventos"]
+        bus[("<b>event-bus</b><br/>[ActiveMQ Artemis] :61616<br/>Topicos durables")]
+        dbu[("BD usuarios")]
+        dbp[("BD preguntas")]
+        dbr[("BD revision")]
+        dbn[("BD notificaciones")]
+    end
+    nav -- "HTTP" --> front
+    nav -- "REST / JSON" --> gw
+    gw -- "/api/usuarios" --> us
+    gw -- "/api/preguntas" --> ps
+    gw -- "/api/revisiones" --> rs
+    gw -- "/api/notificaciones" --> ns
+    us --- dbu
+    ps --- dbp
+    rs --- dbr
+    ns --- dbn
+    ps -- "publica eventos" --> bus
+    rs -- "publica eventos" --> bus
+    bus -- "consume" --> ps
+    bus -- "consume" --> ns
