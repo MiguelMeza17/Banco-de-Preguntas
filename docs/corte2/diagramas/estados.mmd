@@ -1,0 +1,13 @@
+stateDiagram-v2
+    [*] --> Borrador : crear (autor)
+    Borrador --> PendienteRevision : enviar a revision (autor)
+    Borrador --> Archivada : archivar
+    PendienteRevision --> EnRevision : revisores asignados (evento)
+    EnRevision --> Aprobada : todos aprueban (evento)
+    EnRevision --> Rechazada : algun rechazo (evento)
+    Rechazada --> Borrador : corregir (autor)
+    Rechazada --> Archivada : archivar
+    Aprobada --> Publicada : publicar (admin)
+    Aprobada --> Archivada : archivar
+    Publicada --> Archivada : archivar
+    Archivada --> [*]
