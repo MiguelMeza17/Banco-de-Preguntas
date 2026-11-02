@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Agregador del Corte 2: compila y prueba todos los microservicios con un solo comando.
+    mvnw.cmd -f pom-microservicios.xml package
+  El pom.xml de la raiz sigue siendo el monolito Swing del Corte 1.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>co.unicauca.bancopreguntas</groupId>
+    <artifactId>banco-preguntas-microservicios</artifactId>
+    <version>0.1.0</version>
+    <packaging>pom</packaging>
+    <name>banco-preguntas-microservicios</name>
+
+    <modules>
+        <module>event-bus</module>
+        <module>usuarios-service</module>
+        <module>preguntas-service</module>
+        <module>revision-service</module>
+        <module>notificaciones-service</module>
+        <module>api-gateway</module>
+        <module>frontend-web</module>
+    </modules>
+</project>
