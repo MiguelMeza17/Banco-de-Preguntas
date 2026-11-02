@@ -93,6 +93,28 @@ public class Revision {
         this.fechaEvaluacion = Instant.now();
     }
 
+    /**
+     * El revisor abre la pregunta para leerla: ASIGNADA pasa a EN_REVISION.
+     * Si ya estaba en revision no cambia nada (abrirla dos veces no es un error).
+     */
+    public void iniciar(Long revisorQueAbre) {
+        if (revisorQueAbre == null || !revisorQueAbre.equals(revisorId)) {
+            throw new ReglaRevisionException("Solo el revisor asignado puede abrir esta revision.");
+        }
+        if (estado == EstadoRevision.EN_REVISION) {
+            return;
+        }
+        if (!estado.puedeTransicionarA(EstadoRevision.EN_REVISION)) {
+            throw new ReglaRevisionException("La revision ya fue evaluada (" + estado + ").");
+        }
+        this.estado = EstadoRevision.EN_REVISION;
+    }
+
+    /** Indica si el revisor ya emitio su dictamen (APROBADA o RECHAZADA). */
+    public boolean tieneDictamen() {
+        return estado == EstadoRevision.APROBADA || estado == EstadoRevision.RECHAZADA;
+    }
+
     public Long getId() {
         return id;
     }
