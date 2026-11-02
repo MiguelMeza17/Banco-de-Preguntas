@@ -1,0 +1,6 @@
+# Perfil para produccion: --spring.profiles.active=postgres
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/usuarios_service
+    username: ${USUARIOS_DB_USER:usuarios_service}
+    password: ${USUARIOS_DB_PASSWORD:usuarios_service}
