@@ -1,21 +1,16 @@
 package co.unicauca.bancopreguntas.revision.infraestructura;
 
+import co.unicauca.bancopreguntas.revision.evento.EventoIntegracion;
 import co.unicauca.bancopreguntas.revision.evento.PublicadorEventos;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementacion del {@link PublicadorEventos} con los eventos de aplicacion de Spring.
- * <p>
- * Permite que los oyentes ({@code @EventListener}) reaccionen dentro del mismo proceso
- * mientras se integra el bus de eventos entre servicios.
+ * Publica el evento dentro del proceso; {@link ReenvioEventosAlBus} lo reenvia al bus cuando la
+ * transaccion se confirma, para no anunciar cambios que luego se deshacen.
  */
 @Component
 public class PublicadorEventosSpring implements PublicadorEventos {
-
-    private static final Logger log = LoggerFactory.getLogger(PublicadorEventosSpring.class);
 
     private final ApplicationEventPublisher publisher;
 
@@ -24,8 +19,7 @@ public class PublicadorEventosSpring implements PublicadorEventos {
     }
 
     @Override
-    public void publicar(Object evento) {
-        log.info("Evento publicado: {}", evento);
+    public void publicar(EventoIntegracion evento) {
         publisher.publishEvent(evento);
     }
 }

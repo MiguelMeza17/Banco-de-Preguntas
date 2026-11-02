@@ -1,0 +1,6 @@
+# Perfil para produccion: --spring.profiles.active=postgres
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/revision_service
+    username: ${REVISION_DB_USER:revision_service}
+    password: ${REVISION_DB_PASSWORD:revision_service}
