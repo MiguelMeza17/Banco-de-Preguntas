@@ -1,0 +1,18 @@
+flowchart TB
+    subgraph IDENT["Contexto de Identidad (usuarios-service)"]
+        U1[Usuario] --- U2[Rol] --- U3[Credencial Argon2id]
+    end
+    subgraph AUT["Contexto de Autoria (preguntas-service)"]
+        A1[Pregunta] --- A2[Estado de la pregunta] --- A3[Validacion estructural]
+    end
+    subgraph REV["Contexto de Revision por Pares (revision-service)"]
+        R1[Revision] --- R2[Dictamen y observaciones] --- R3[Historial]
+    end
+    subgraph NOT["Contexto de Notificaciones (notificaciones-service)"]
+        N1[Notificacion] --- N2[Proyeccion pregunta - autor]
+    end
+    AUT -- "PreguntaCreada<br/>PreguntaEnviadaARevision" --> NOT
+    REV -- "RevisoresAsignados<br/>PreguntaEvaluada" --> AUT
+    REV -- "RevisoresAsignados<br/>PreguntaEvaluada" --> NOT
+    IDENT -. "ids de usuario" .-> AUT
+    IDENT -. "ids de usuario" .-> REV
