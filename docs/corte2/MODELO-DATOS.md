@@ -1,0 +1,80 @@
+# Modelo de datos (diagrama entidad-relacion)
+
+Cada microservicio es dueno de su base de datos. Las relaciones entre tablas de servicios distintos son referencias logicas por identificador (no llaves foraneas); la consistencia entre servicios se mantiene con eventos. `PREGUNTAS_CONOCIDAS` es una proyeccion que notificaciones-service construye a partir de `PreguntaCreada`.
+
+| Tabla | Servicio |
+|---|---|
+| USUARIOS | usuarios-service |
+| PREGUNTAS | preguntas-service |
+| REVISIONES | revision-service |
+| NOTIFICACIONES, PREGUNTAS_CONOCIDAS | notificaciones-service |
+
+```mermaid
+erDiagram
+    USUARIOS ||--o{ PREGUNTAS : "es autor de (autor_id)"
+    USUARIOS ||--o{ REVISIONES : "revisa (revisor_id)"
+    PREGUNTAS ||--o{ REVISIONES : "se evalua en (pregunta_id)"
+    PREGUNTAS ||--o| PREGUNTAS_CONOCIDAS : "se proyecta en"
+    USUARIOS ||--o{ NOTIFICACIONES : "recibe (usuario_id)"
+    PREGUNTAS ||--o{ NOTIFICACIONES : "origina (pregunta_id)"
+
+    USUARIOS {
+        bigint id PK
+        varchar login UK
+        varchar nombre_completo
+        varchar email
+        varchar rol "ADMINISTRADOR, AUTOR, REVISOR, DOCENTE, ESTUDIANTE"
+        varchar estado "ACTIVO, INACTIVO"
+        varchar password_hash "Argon2id"
+        timestamp fecha_registro
+    }
+    PREGUNTAS {
+        bigint id PK
+        varchar tipo
+        varchar titulo
+        varchar contexto
+        varchar enunciado
+        varchar opcion_a
+        varchar opcion_b
+        varchar opcion_c
+        varchar opcion_d
+        char respuesta_correcta "A, B, C o D"
+        varchar justificacion
+        varchar bibliografia
+        varchar competencia
+        varchar tema
+        varchar subtema
+        varchar dificultad "BAJA, MEDIA, ALTA"
+        varchar estado "7 estados del ciclo de vida"
+        bigint autor_id "ref. logica a USUARIOS"
+        timestamp fecha_creacion
+        timestamp fecha_actualizacion
+    }
+    REVISIONES {
+        bigint id PK
+        bigint pregunta_id "ref. logica a PREGUNTAS"
+        bigint revisor_id "ref. logica a USUARIOS"
+        varchar estado "ASIGNADA, EN_REVISION, APROBADA, RECHAZADA"
+        timestamp fecha_asignacion
+        varchar observaciones
+        timestamp fecha_evaluacion
+    }
+    NOTIFICACIONES {
+        bigint id PK
+        bigint usuario_id "destinatario individual"
+        varchar rol "o destinatario por rol"
+        varchar tipo_evento
+        bigint pregunta_id
+        varchar titulo
+        varchar mensaje
+        boolean leida
+        timestamp fecha
+    }
+    PREGUNTAS_CONOCIDAS {
+        bigint pregunta_id PK
+        bigint autor_id
+        varchar titulo
+    }
+```
+
+Imagen exportada: [img/er.png](img/er.png). Las fuentes Mermaid de todos los diagramas estan en [diagramas/](diagramas/).
