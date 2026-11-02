@@ -1,0 +1,26 @@
+server:
+  port: 8070
+
+spring:
+  application:
+    name: event-bus
+  artemis:
+    mode: embedded
+    embedded:
+      enabled: true
+      persistent: true
+
+bus:
+  puerto: 61616
+  directorio-datos: ./data/broker
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+logging:
+  level:
+    org.apache.activemq.artemis: WARN
+    org.apache.activemq.audit: WARN
