@@ -123,6 +123,43 @@ roles (RBAC). Se elige porque el sistema tiene 5 roles con permisos claramente d
 (RF-03) y RNF-07 exige explícitamente restringir el acceso según el rol; Spring Security
 implementa esta táctica de forma directa mediante anotaciones sobre cada endpoint.
 
+## 6. Corte 2 — Arquitectura distribuida con microservicios y eventos
+
+En el segundo corte el monolito en capas se refactoriza a cuatro microservicios con base de datos
+propia, un API Gateway, un bus de eventos y un frontend web separado que consume las APIs REST.
+El monolito Swing del corte 1 se conserva en la raíz del repositorio como referencia.
+
+### 6.1 Decisiones
+
+| Decisión | Elección | Justificación |
+|---|---|---|
+| Estilo arquitectónico | Microservicios orientados a eventos | Lo exige el corte 2; cada contexto escala y se despliega por separado. |
+| Tipo de aplicación | Web (cliente HTML/JS + APIs REST) | RNF-02 (navegadores modernos) y el protocolo de sustentación pide frontend y backend separados por REST. |
+| Back-end | Java 21 + Spring Boot 3.3 | Continuidad con el corte 1; Spring Cloud Gateway y JMS cubren gateway y eventos. |
+| Bus de eventos | ActiveMQ Artemis (JMS) | Tópicos con suscripciones durables compartidas; se embebe para ejecutar todo solo con Java. |
+| Base de datos | PostgreSQL por servicio (H2 en archivo para desarrollo) | Se mantiene la elección del corte 1; cada servicio es dueño de sus datos. |
+
+### 6.2 Documentos del corte 2
+
+- [Contextos delimitados](corte2/CONTEXTOS-DELIMITADOS.md) (T6.1)
+- [Arquitectura C4: contexto, contenedores y componentes](corte2/ARQUITECTURA-C4.md) (T6.2)
+- [Contrato de eventos del bus](corte2/EVENTOS.md)
+- [Modelo de datos: diagrama entidad-relación](corte2/MODELO-DATOS.md)
+- [Escenario de calidad de escalabilidad](corte2/ESCENARIO-ESCALABILIDAD.md) (T6.8)
+
+### 6.3 Planificación del Sprint 2 y enlaces (T6.10)
+
+**Planificación del Sprint 2 en Jira**
+
+![Planificación del Sprint 2 en Jira](corte2/img/sprint2-jira.png)
+
+> Pendiente: guardar el pantallazo del tablero del Sprint 2 como `docs/corte2/img/sprint2-jira.png`.
+
+| Recurso | Enlace |
+|---|---|
+| Repositorio de GitHub | https://github.com/MiguelMeza17/Banco-de-Preguntas |
+| Video de sustentación (YouTube) | _Pendiente: agregar el enlace cuando se publique el video._ |
+
 ## Referencias
 
 Bass, L., Clements, P., & Kazman, R. (2021). *Software Architecture in Practice* (4th ed.).

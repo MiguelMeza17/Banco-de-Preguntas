@@ -9,6 +9,67 @@
 
 ---
 
+## 🚀 Corte 2 — Microservicios orientados a eventos
+
+El sistema se refactorizó a una arquitectura distribuida. El monolito Swing del corte 1 sigue en
+`src/` (raíz) como referencia; el corte 2 vive en estas carpetas:
+
+| Componente | Puerto | Qué hace |
+|---|---|---|
+| `frontend-web` | 3000 | Cliente web (HTML, CSS, JS). Solo habla con el gateway. |
+| `api-gateway` | 8080 | Punto de entrada `/api/**` y fachada `/api/fachada/**`. |
+| `usuarios-service` | 8081 | Registro, inicio de sesión y roles. |
+| `preguntas-service` | 8082 | Crear/editar preguntas, ciclo de vida y consulta paginada. Swagger en `/swagger-ui.html`. |
+| `revision-service` | 8083 | Asignar revisores, evaluar y consultar el historial. Swagger en `/swagger-ui.html`. |
+| `notificaciones-service` | 8085 | Avisos a partir de los eventos. |
+| `event-bus` | 61616 (8070 salud) | Broker ActiveMQ Artemis embebido. |
+
+### Requisitos
+
+- Java 21 o superior. Nada más: Maven se descarga solo con `mvnw.cmd`, y el bus y las bases de datos
+  (H2 en archivo) van embebidos. No hace falta Docker, PostgreSQL ni RabbitMQ.
+- Puertos libres: 3000, 8070, 8080 a 8083, 8085 y 61616. El script avisa si alguno está ocupado.
+
+### Ejecutar
+
+```powershell
+.\iniciar.ps1          # compila y arranca todo; abre http://localhost:3000
+.\iniciar.ps1 -ConPruebas
+.\detener.ps1          # detiene todos los componentes
+```
+
+También se puede hacer doble clic en `iniciar.cmd` y `detener.cmd`. Los registros quedan en `logs\`.
+
+**Usuarios de demostración** (se crean la primera vez): `admin`, `autor`, `revisor1`, `revisor2`,
+todos con la contraseña `Demo#2026`.
+
+### Pruebas
+
+```powershell
+.\mvnw.cmd -f pom-microservicios.xml test
+```
+
+90 pruebas unitarias y de integración (JUnit 5, Mockito, H2) repartidas en los servicios.
+
+### Base de datos PostgreSQL (opcional)
+
+Cada servicio trae el perfil `postgres` (`application-postgres.yml`), por ejemplo:
+`java -jar preguntas-service/target/preguntas-service-0.1.0.jar --spring.profiles.active=postgres`.
+
+### Documentación del corte 2
+
+- [Documento de arquitectura](docs/ARQUITECTURA.md) (sección 6)
+- [Contextos delimitados](docs/corte2/CONTEXTOS-DELIMITADOS.md)
+- [Arquitectura C4](docs/corte2/ARQUITECTURA-C4.md)
+- [Contrato de eventos](docs/corte2/EVENTOS.md)
+- [Escenario de escalabilidad](docs/corte2/ESCENARIO-ESCALABILIDAD.md)
+
+---
+
+# Corte 1 — Aplicación monolítica (referencia)
+
+---
+
 ## 👥 Integrantes
 Integrante 1: Duvan Alexis Hoyos.
 Integrante 2: Juan José Hurtado.
