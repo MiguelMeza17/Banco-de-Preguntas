@@ -1,4 +1,7 @@
 /target/
+**/target/
 /.idea/
 /*.iml
 /*.db
+**/data/
+**/logs/
