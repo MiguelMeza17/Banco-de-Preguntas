@@ -1,0 +1,23 @@
+flowchart TB
+    gw["api-gateway"]
+    subgraph ps["preguntas-service"]
+        ctrl["<b>PreguntaController</b><br/>REST + OpenAPI"]
+        adap["<b>PreguntaRequestAdapter</b><br/>Adapter"]
+        srv["<b>PreguntaService</b><br/>Casos de uso"]
+        fab["<b>FabricaPreguntas / CreadorPregunta</b><br/>Factory Method + Builder"]
+        val["<b>ValidadorEstructural</b><br/>RF-08 a RF-13"]
+        est["<b>EstadoPregunta</b><br/>State (7 estados)"]
+        fil["<b>CombinadorFiltros / EstrategiaFiltro</b><br/>Strategy"]
+        repo["<b>PreguntaRepository</b><br/>JPA + Specifications"]
+        pub["<b>PublicadorEventos / ReenvioEventosAlBus</b><br/>Observer"]
+        cons["<b>ConsumidorEventosRevision</b><br/>JmsListener"]
+    end
+    bus[("event-bus")]
+    db[("BD preguntas")]
+    gw --> ctrl --> adap --> srv
+    srv --> fab --> val
+    srv --> est
+    srv --> fil --> repo
+    srv --> repo --> db
+    srv --> pub --> bus
+    bus --> cons --> srv
